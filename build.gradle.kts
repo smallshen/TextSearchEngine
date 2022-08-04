@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation("com.github.haifengl:smile-nlp:2.6.0")
+    implementation("it.unimi.dsi:fastutil:8.5.8")
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
     testImplementation(kotlin("test"))

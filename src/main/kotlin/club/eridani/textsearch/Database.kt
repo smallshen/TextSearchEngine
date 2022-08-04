@@ -1,13 +1,21 @@
 package club.eridani.textsearch
 
+import club.eridani.textsearch.levenshtein.levenshteinDistance
 import club.eridani.textsearch.tokenizer.Tokenizer
 
 class Database(
-    val tokenizers: Map<Language, Tokenizer>
+    private val tokenizers: Map<Language, Tokenizer>,
+    private val toleranceLevel: Int,
 ) {
 
     private val nodes: MutableMap<String, Node> = hashMapOf()
     private val internalStore = hashMapOf<Node, MutableList<Document>>()
+    private val sortedList = mutableSetOf<Node>()
+
+    init {
+        // lol i'm lazy
+        sortedList.add("are".asNode())
+    }
 
 
     fun insert(text: String, language: Language = Language.English) {
@@ -28,7 +36,26 @@ class Database(
     }
 
 
-    fun search(word: String, language: Language = Language.English): List<Document> {
-        return internalStore[word.asNode()] ?: emptyList()
+    fun search(word: String, language: Language = Language.English, typoTolerance: Int): List<Document> {
+        val texts = splitText(word, language).map { it.asNode() }
+        if (texts.isEmpty()) return emptyList()
+        if (texts.size == 1) {
+            return internalStore[texts.first()] ?: emptyList()
+        }
+
+        texts.forEach { t ->
+            nodes.values
+                .filter { w ->
+                    val distance = levenshteinDistance(w.word, t.word)
+                    distance < typoTolerance
+                }
+                .forEach {
+                    internalStore[it]?.forEach {
+                       TODO("Range based tolerance search")
+                    }
+                }
+        }
     }
 }
+
+
